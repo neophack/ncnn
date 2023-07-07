@@ -25,7 +25,6 @@
 #include <vector>
 #include <iostream>
 
-
 static void initialize_squeezenet(ncnn::Net& squeezenet, const std::string& param_path, const std::string& model_path)
 {
     squeezenet.opt.use_vulkan_compute = true;
@@ -61,7 +60,6 @@ static void infer_squeezenet(const cv::Mat& bgr, const ncnn::Net& squeezenet, st
         cls_scores[j] = out[j];
     }
 }
-
 
 static int print_topk(const std::vector<float>& cls_scores, int topk)
 {
