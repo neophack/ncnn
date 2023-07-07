@@ -17,6 +17,11 @@ sudo apt install liblua5.4-dev
 ```
 
 build project
+```
+mkdir build-termux && cd build-termux
+cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI="arm64-v8a" -DANDROID_PLATFORM=android-24 -DNCNN_VULKAN=ON -DNCNN_PLATFORM_API=OFF -DNCNN_BUILD_EXAMPLES=ON ..
+cmake --build . -j 12
+```
 
 run
 ```

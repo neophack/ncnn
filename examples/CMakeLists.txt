@@ -71,16 +71,78 @@ if(NCNN_PIXEL)
             ncnn_add_example(p2pnet)
         endif()
 
-        # 查找Lua库
-        find_package(Lua REQUIRED)
+    
+        # Download and extract Lua source code
+        include(FetchContent)
+        FetchContent_Declare(
+        lua
+        URL https://www.lua.org/ftp/lua-5.4.3.tar.gz
+        )
+        FetchContent_GetProperties(lua)
+        if(NOT lua_POPULATED)
+            FetchContent_Populate(lua)
+            # add_subdirectory(${lua_SOURCE_DIR} ${lua_BINARY_DIR})
+            # Set Lua source code directory
+            set(LUA_SRC_DIR ${lua_SOURCE_DIR}/src)
 
+            # 添加Lua源代码文件
+            set(LUA_SOURCES
+                ${LUA_SRC_DIR}/lapi.c
+                ${LUA_SRC_DIR}/lbaselib.c
+                ${LUA_SRC_DIR}/lcode.c
+                ${LUA_SRC_DIR}/lcorolib.c
+                ${LUA_SRC_DIR}/lctype.c
+                ${LUA_SRC_DIR}/ldebug.c
+                ${LUA_SRC_DIR}/ldo.c
+                ${LUA_SRC_DIR}/ldump.c
+                ${LUA_SRC_DIR}/lfunc.c
+                ${LUA_SRC_DIR}/lgc.c
+                ${LUA_SRC_DIR}/linit.c
+                ${LUA_SRC_DIR}/liolib.c
+                ${LUA_SRC_DIR}/llex.c
+                ${LUA_SRC_DIR}/lmathlib.c
+                ${LUA_SRC_DIR}/lmem.c
+                ${LUA_SRC_DIR}/lobject.c
+                ${LUA_SRC_DIR}/lopcodes.c
+                ${LUA_SRC_DIR}/lparser.c
+                ${LUA_SRC_DIR}/lstate.c
+                ${LUA_SRC_DIR}/lstring.c
+                ${LUA_SRC_DIR}/lstrlib.c
+                ${LUA_SRC_DIR}/ltable.c
+                ${LUA_SRC_DIR}/ltablib.c
+                ${LUA_SRC_DIR}/ltm.c
+                ${LUA_SRC_DIR}/lundump.c
+                ${LUA_SRC_DIR}/lutf8lib.c
+                ${LUA_SRC_DIR}/lvm.c
+                ${LUA_SRC_DIR}/lzio.c
+                ${LUA_SRC_DIR}/lauxlib.c
+                ${LUA_SRC_DIR}/ldblib.c
+                ${LUA_SRC_DIR}/loadlib.c
+                ${LUA_SRC_DIR}/lstrlib.c
+                ${LUA_SRC_DIR}/ltablib.c
+                ${LUA_SRC_DIR}/lutf8lib.c
+                ${LUA_SRC_DIR}/lzio.c
+                ${LUA_SRC_DIR}/lua.c
+                ${LUA_SRC_DIR}/luac.c
+            )
+
+            # 生成静态库
+            add_library(lua STATIC ${LUA_SOURCES})
+            target_compile_options(lua PRIVATE -fPIC)
+
+            # Set Lua include directory
+            set(LUA_INCLUDE_DIR ${LUA_SRC_DIR})
+        endif()
+
+        
         add_library(luainfer SHARED luainfer.cpp)
+        target_include_directories(luainfer PRIVATE ${LUA_INCLUDE_DIR})
         if(OpenCV_FOUND)
-            target_include_directories(luainfer PRIVATE ${OpenCV_INCLUDE_DIRS} ${LUA_INCLUDE_DIR})
-            target_link_libraries(luainfer PRIVATE ncnn ${OpenCV_LIBS} ${LUA_LIBRARIES})
+            target_include_directories(luainfer PRIVATE ${OpenCV_INCLUDE_DIRS})
+            target_link_libraries(luainfer PRIVATE ncnn ${OpenCV_LIBS} lua)
         elseif(NCNN_SIMPLEOCV)
             target_compile_definitions(luainfer PUBLIC USE_NCNN_SIMPLEOCV )
-            target_link_libraries(luainfer PRIVATE ncnn ${LUA_LIBRARIES})
+            target_link_libraries(luainfer PRIVATE ncnn lua)
         endif()
         add_custom_command(
             TARGET luainfer POST_BUILD
@@ -97,7 +159,7 @@ if(NCNN_PIXEL)
                 ${CMAKE_SOURCE_DIR}/examples/zidane.jpg
                 ${CMAKE_CURRENT_BINARY_DIR}/zidane.jpg
         )
-        
+    
 
     else()
         message(WARNING "OpenCV not found and NCNN_SIMPLEOCV disabled, examples won't be built")
