@@ -1,3 +1,31 @@
+# lua example
+## files
+
+```
+examples/luainfer.lua
+examples/luainfer.cpp
+examples/zidane.jpg
+examples/squeezenet_v1.1.param.bin
+examples/squeezenet_v1.1.param
+```
+## steps
+
+install lua
+```
+sudo apt install lua5.4 
+sudo apt install liblua5.4-dev 
+```
+
+build project
+
+run
+```
+cd build/example/
+lua luainfer.lua
+```
+
+# 
+
 ![NCNN](https://raw.githubusercontent.com/Tencent/ncnn/master/images/256-ncnn.png)
 
 # ncnn
