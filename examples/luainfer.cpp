@@ -65,25 +65,25 @@ static int lua_initialize_squeezenet(lua_State* L)
     return 0;
 }
 
-
 // Lua绑定函数
-static int lua_infer_squeezenet(lua_State* L) {
-    const char* imagepath = luaL_checkstring(L, 1);  // 获取第一个参数
+static int lua_infer_squeezenet(lua_State* L)
+{
+    const char* imagepath = luaL_checkstring(L, 1); // 获取第一个参数
     std::vector<float> cls_scores;
 
     infer_squeezenet(imagepath, cls_scores);
 
     // 将结果压入Lua栈
     lua_newtable(L);
-    for (size_t i = 0; i < cls_scores.size(); i++) {
+    for (size_t i = 0; i < cls_scores.size(); i++)
+    {
         // std::cerr << "i: " << i <<" "<<cls_scores[i]<< std::endl;
         lua_pushnumber(L, cls_scores[i]);
         lua_rawseti(L, -2, i + 1);
     }
     // lua_settable(L,-cls_scores.size()-1);
-    return 1;  // 返回结果个数
+    return 1; // 返回结果个数
 }
-
 
 static int lua_print_topk(lua_State* L)
 {
@@ -95,7 +95,7 @@ static int lua_print_topk(lua_State* L)
     int size = lua_rawlen(L, 1);
 
     // Create a vector to store the scores and indices
-    std::vector<std::pair<float, int>> vec(size);
+    std::vector<std::pair<float, int> > vec(size);
 
     // Populate the vector with the scores and indices from the input table
     for (int i = 0; i < size; i++)
@@ -108,7 +108,7 @@ static int lua_print_topk(lua_State* L)
 
     // Partially sort the vector based on the scores in descending order
     std::partial_sort(vec.begin(), vec.begin() + topk, vec.end(),
-                      std::greater<std::pair<float, int>>());
+                      std::greater<std::pair<float, int> >());
 
     // Print the topk scores and indices
     for (int i = 0; i < topk; i++)
@@ -130,7 +130,8 @@ static const luaL_Reg libluainfer[] = {
 };
 
 // 绑定库到全局命名空间
-extern "C" int luaopen_libluainfer(lua_State* L) {
+extern "C" int luaopen_libluainfer(lua_State* L)
+{
     luaL_newlib(L, libluainfer);
     return 1;
 }
