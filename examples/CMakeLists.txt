@@ -70,6 +70,35 @@ if(NCNN_PIXEL)
             ncnn_add_example(rvm)
             ncnn_add_example(p2pnet)
         endif()
+
+        # 查找Lua库
+        find_package(Lua REQUIRED)
+
+        add_library(luainfer SHARED luainfer.cpp)
+        if(OpenCV_FOUND)
+            target_include_directories(luainfer PRIVATE ${OpenCV_INCLUDE_DIRS} ${LUA_INCLUDE_DIR})
+            target_link_libraries(luainfer PRIVATE ncnn ${OpenCV_LIBS} ${LUA_LIBRARIES})
+        elseif(NCNN_SIMPLEOCV)
+            target_compile_definitions(luainfer PUBLIC USE_NCNN_SIMPLEOCV )
+            target_link_libraries(luainfer PRIVATE ncnn ${LUA_LIBRARIES})
+        endif()
+        add_custom_command(
+            TARGET luainfer POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/examples/luainfer.lua
+                ${CMAKE_CURRENT_BINARY_DIR}/luainfer.lua
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/examples/squeezenet_v1.1.bin
+                ${CMAKE_CURRENT_BINARY_DIR}/squeezenet_v1.1.bin
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/examples/squeezenet_v1.1.param
+                ${CMAKE_CURRENT_BINARY_DIR}/squeezenet_v1.1.param
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/examples/zidane.jpg
+                ${CMAKE_CURRENT_BINARY_DIR}/zidane.jpg
+        )
+        
+
     else()
         message(WARNING "OpenCV not found and NCNN_SIMPLEOCV disabled, examples won't be built")
     endif()

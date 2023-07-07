@@ -23,26 +23,33 @@
 #endif
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 
-static int detect_squeezenet(const cv::Mat& bgr, std::vector<float>& cls_scores)
+
+static void initialize_squeezenet(ncnn::Net& squeezenet, const std::string& param_path, const std::string& model_path)
 {
-    ncnn::Net squeezenet;
-
     squeezenet.opt.use_vulkan_compute = true;
 
-    // the ncnn model https://github.com/nihui/ncnn-assets/tree/master/models
-    if (squeezenet.load_param("squeezenet_v1.1.param"))
+    if (squeezenet.load_param(param_path.c_str()))
+    {
+        std::cerr << "Failed to load param file: " << param_path << std::endl;
         exit(-1);
-    if (squeezenet.load_model("squeezenet_v1.1.bin"))
+    }
+    if (squeezenet.load_model(model_path.c_str()))
+    {
+        std::cerr << "Failed to load model file: " << model_path << std::endl;
         exit(-1);
+    }
+}
 
+static void infer_squeezenet(const cv::Mat& bgr, const ncnn::Net& squeezenet, std::vector<float>& cls_scores)
+{
     ncnn::Mat in = ncnn::Mat::from_pixels_resize(bgr.data, ncnn::Mat::PIXEL_BGR, bgr.cols, bgr.rows, 227, 227);
 
     const float mean_vals[3] = {104.f, 117.f, 123.f};
     in.substract_mean_normalize(mean_vals, 0);
 
     ncnn::Extractor ex = squeezenet.create_extractor();
-
     ex.input("data", in);
 
     ncnn::Mat out;
@@ -53,9 +60,8 @@ static int detect_squeezenet(const cv::Mat& bgr, std::vector<float>& cls_scores)
     {
         cls_scores[j] = out[j];
     }
-
-    return 0;
 }
+
 
 static int print_topk(const std::vector<float>& cls_scores, int topk)
 {
@@ -92,6 +98,12 @@ int main(int argc, char** argv)
 
     const char* imagepath = argv[1];
 
+    // Initialize SqueezeNet
+    ncnn::Net squeezenet;
+    std::string param_path = "squeezenet_v1.1.param";
+    std::string model_path = "squeezenet_v1.1.bin";
+    initialize_squeezenet(squeezenet, param_path, model_path);
+
     cv::Mat m = cv::imread(imagepath, 1);
     if (m.empty())
     {
@@ -99,8 +111,9 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    // Perform inference
     std::vector<float> cls_scores;
-    detect_squeezenet(m, cls_scores);
+    infer_squeezenet(m, squeezenet, cls_scores);
 
     print_topk(cls_scores, 3);
 
