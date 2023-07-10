@@ -147,7 +147,8 @@ static const luaL_Reg libluarssi[] = {
     {"initialize_model", lua_initialize_model},
     {"infer_model", lua_infer_model},
     {"print_topk", lua_print_topk},
-    {NULL, NULL}};
+    {NULL, NULL}
+};
 
 // 绑定库到全局命名空间
 extern "C" int luaopen_libluarssi(lua_State* L)
