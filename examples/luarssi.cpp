@@ -1,7 +1,7 @@
 extern "C" {
-#include "lua.h"
-#include <lauxlib.h>
-#include <lualib.h>
+    #include "lua.h"
+    #include <lauxlib.h>
+    #include <lualib.h>
 }
 
 #include "net.h"
@@ -9,6 +9,7 @@ extern "C" {
 #include <stdio.h>
 #include <vector>
 #include <iostream>
+#include <functional>
 
 ncnn::Net model;
 
