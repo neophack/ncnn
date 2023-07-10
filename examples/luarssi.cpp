@@ -9,6 +9,7 @@ extern "C" {
 #include <stdio.h>
 #include <vector>
 #include <iostream>
+#include <functional>
 
 ncnn::Net model;
 
